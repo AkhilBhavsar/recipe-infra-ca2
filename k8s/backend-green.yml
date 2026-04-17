@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recipe-backend-blue
+  name: recipe-backend-green
   namespace: recipe-app
 spec:
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       app: recipe-backend
-      version: blue
+      version: green
   template:
     metadata:
       labels:
         app: recipe-backend
-        version: blue
+        version: green
     spec:
       containers:
       - name: backend
@@ -42,12 +42,6 @@ spec:
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 20
         resources:
           requests:
             cpu: "200m"

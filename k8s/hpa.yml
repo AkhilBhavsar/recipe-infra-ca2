@@ -1,7 +1,7 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: recipe-backend-hpa
+  name: backend-hpa
   namespace: recipe-app
 spec:
   scaleTargetRef:
@@ -11,17 +11,17 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 50
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: recipe-frontend-hpa
+  name: frontend-hpa
   namespace: recipe-app
 spec:
   scaleTargetRef:
@@ -31,9 +31,9 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 50
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50

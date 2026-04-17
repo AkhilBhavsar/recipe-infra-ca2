@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: recipe-frontend-blue
+  name: recipe-frontend-green
   namespace: recipe-app
 spec:
-  replicas: 2
+  replicas: 0
   selector:
     matchLabels:
       app: recipe-frontend
-      version: blue
+      version: green
   template:
     metadata:
       labels:
         app: recipe-frontend
-        version: blue
+        version: green
     spec:
       containers:
       - name: frontend
