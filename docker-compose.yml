@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - recipe-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  recipe-backend:
+    build: ./recipe-backend-ca2
+    ports:
+      - "8080:8080"
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB_NAME: recipes
+      MONGO_COLLECTION: recipe
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - recipe-net
+    restart: on-failure
+  recipe-frontend:
+    build: ./recipe-frontend-ca2
+    ports:
+      - "22137:22137"
+    depends_on:
+      - recipe-backend
+    networks:
+      - recipe-net
+    restart: on-failure
+volumes:
+  mongo-data:
+networks:
+  recipe-net:
