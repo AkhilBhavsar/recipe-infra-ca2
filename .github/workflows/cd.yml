@@ -1,55 +1,57 @@
-name: CD - Deploy to AKS
+name: CD — Deploy to AKS
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'production'
   workflow_run:
     workflows: ["Frontend CI", "Backend CI"]
-    types:
-      - completed
-    branches: [ main ]
+    types: [completed]
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout infra repo
         uses: actions/checkout@v4
 
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
 
-      - name: Get AKS credentials
+      - name: Configure kubeconfig
         run: |
-          az aks get-credentials \
-            --resource-group recipe-app-rg \
-            --name recipe-aks \
-            --overwrite-existing
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
 
-      - name: Deploy blue environment
+      - name: Verify cluster connection
+        run: kubectl get nodes
+
+      - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/namespace.yml
+          kubectl apply -f k8s/secret.yml
           kubectl apply -f k8s/mongo.yml
           kubectl apply -f k8s/backend-blue.yml
           kubectl apply -f k8s/frontend-blue.yml
-
-      - name: Wait for blue deployment
-        run: |
-          kubectl rollout status deployment/recipe-backend-blue -n recipe-app --timeout=120s
-          kubectl rollout status deployment/recipe-frontend-blue -n recipe-app --timeout=120s
-
-      - name: Switch traffic to blue
-        run: |
           kubectl apply -f k8s/services.yml
+          kubectl apply -f k8s/hpa.yml
 
-      - name: Verify deployment health
+      - name: Restart deployments to pull latest images
         run: |
+          kubectl rollout restart deployment/recipe-frontend-blue -n recipe-app
+          kubectl rollout restart deployment/recipe-backend-blue -n recipe-app
+
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/recipe-frontend-blue -n recipe-app --timeout=180s
+          kubectl rollout status deployment/recipe-backend-blue -n recipe-app --timeout=180s
+
+      - name: Verify pods and services
+        run: |
+          echo "--- Pods ---"
           kubectl get pods -n recipe-app
-          kubectl get services -n recipe-app
+          echo "--- Services ---"
+          kubectl get svc -n recipe-app
+          echo "--- HPA ---"
+          kubectl get hpa -n recipe-app
