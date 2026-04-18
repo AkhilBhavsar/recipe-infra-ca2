@@ -14,10 +14,16 @@ resource "azurerm_kubernetes_cluster" "aks" {
     type = "SystemAssigned"
   }
 
+  oidc_issuer_enabled = true
+
   network_profile {
     network_plugin = "kubenet"
     dns_service_ip = "10.0.0.10"
     service_cidr   = "10.0.0.0/16"
+  }
+
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks.id
   }
 }
 
