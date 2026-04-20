@@ -3,8 +3,15 @@ kind: Ingress
 metadata:
   name: recipe-frontend-ingress
   namespace: recipe-app
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - recipe-tracker-ing.francecentral.cloudapp.azure.com
+      secretName: recipe-tls
   rules:
     - host: recipe-tracker-ing.francecentral.cloudapp.azure.com
       http:
