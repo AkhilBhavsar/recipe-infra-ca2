@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: recipeacr9c4b0f.azurecr.io/recipe-backend:38c9a68c2bb01661d3b8c3e7c119497e38fbae01
+        image: recipeacr9c4b0f.azurecr.io/recipe-backend:fdbbeaa48a756311d55671b6f9a44216a99d4454
         ports:
         - containerPort: 8080
         env:
