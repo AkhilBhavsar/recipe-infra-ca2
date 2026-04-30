@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: recipeacr9c4b0f.azurecr.io/recipe-frontend:0aa9c5358211e073a2138c2bf337fb32b117d351
+        image: recipeacr9c4b0f.azurecr.io/recipe-frontend:f6bfff9a82f13edc7742ac2ecb26b18f2566ed61
         ports:
         - containerPort: 22137
         resources:
